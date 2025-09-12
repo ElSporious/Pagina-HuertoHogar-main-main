@@ -14,6 +14,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const region = document.getElementById('region').value;
         const comuna = document.getElementById('comuna').value;
 
+        // Expresiones regulares
+        const correoRegex = /@(duoc\.cl|profesor\.duoc\.cl|gmail\.com)$/;
+
+
+
         // Validación simple
         if (nombre === '' || correo === '' || confirmarCorreo === '' || contrasena === '' || confirmarContrasena === '') {
             alert('Por favor, completa todos los campos obligatorios.');
@@ -27,6 +32,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (contrasena !== confirmarContrasena) {
             alert('La contraseña y la confirmación de contraseña no coinciden.');
+            return;
+        }
+
+        //if largo de contraselas
+        if (contrasena.length < 4 || contrasena.length > 10) {
+            alert('La contraseña debe tener entre 4 y 10 caracteres.');
+            return;
+        }
+
+        //if de largo del correo
+        if (correo.length > 100){
+            alert('El correo no puede superar los 100 caracteres')
+            return;
+        }
+
+        //if de RegexCorreo
+        if (!correoRegex.test(correo)) {
+            alert('El correo electrónico debe terminar en @duoc.cl, @profesor.duoc.cl o @gmail.com');
             return;
         }
 
