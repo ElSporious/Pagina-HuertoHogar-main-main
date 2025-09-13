@@ -101,12 +101,6 @@ h1, h2, h3 {
     color: #8B4513;
 }
 
-/* Enlaces */
-
-
-a:hover {
-    text-decoration: underline;
-}
 
 /* Botones */
 button, .btn {

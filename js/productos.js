@@ -16,6 +16,7 @@ let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
 const productListContainer = document.getElementById('product-list-container');
 const cartCountElement = document.getElementById('cart-count');
 
+
 // Mostrar productos en la página
 function mostrarProductos() {
     productListContainer.innerHTML = '';
@@ -24,13 +25,13 @@ function mostrarProductos() {
         productCard.className = 'col-md-3 mb-4';
         productCard.innerHTML = `
             <div class="card h-100">
-                <img src="img/${producto.imagen}" class="card-img-top tamano_img" alt="${producto.nombre}">
+                <img src="img/${producto.imagen}" class="card-img-top tamano_img" alt="${producto.nombre}" onclick="window.location.href='detalle_producto.html?id=${producto.id}'">
                 <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">${producto.nombre}</h5>
-                    <p class="card-text">${producto.categoria}</p>
-                    <p class="card-text">${producto.descripcion}</p>
-                    <p class="card-text mt-auto"><strong>$${producto.precio}</strong></p>
-                    <button onclick="agregarAlCarrito(${producto.id})" class="btn btn-secondary">Añadir</button>
+                    <h5 class="titulo">${producto.nombre}</h5>
+                    <p class="desc_prod_text_sec">${producto.categoria}</p>
+                    <p class="desc_prod_text_sec">${producto.descripcion}</p>
+                    <p class="desc_prod_text_sec card-text mt-auto"><strong>$${producto.precio} CLP</strong></p>
+                    <button onclick="agregarAlCarrito(event, ${producto.id})">Añadir</button>
                 </div>
             </div>
         `;
@@ -40,7 +41,10 @@ function mostrarProductos() {
 
 
 // Agregar al carrito
-function agregarAlCarrito(id) {
+function agregarAlCarrito(e, id) {
+    // Detiene la propagación del evento click para que el enlace no se active
+    e.stopPropagation(); 
+
     const producto = productos.find(p => p.id === id);
     const item = carrito.find(i => i.id === id);
 

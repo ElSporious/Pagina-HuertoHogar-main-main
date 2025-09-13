@@ -56,7 +56,8 @@
                   Villarica, Nacimiento, Viña del Mar, Valparaíso, y Concepción. Nuestra misión es conectar a las
                   familias chilenas con el campo, promoviendo un estilo de vida saludable y sostenible.
               </p>
-              <button>Ver Productos</button>
+              <a href="productos.html"><button>Ver Productos</button></a>
+              
           </div>
           <div class="col-md-6 text-center">
               <img src="img/Logo.png" alt="" width="500">
@@ -64,15 +65,16 @@
       </div>
     </div>
     <br>
+    <br>
+
+    <div class="container mt-4">
+      <div id="categoria-descripcion" class="text-center mb-4">
+        <h2></h2>
+        <p></p>
+      </div>
+    </div>
     
     <!--mostrar productos-->
-    <div class="container mt-4">
-      <div class="row" id="product-list-container">
-          </div>
-    </div>
-      
-    <br>
-      
     <section class="mt-4 container">
       <div class="row" id="contenedor-productos"></div>
     </section>
@@ -115,7 +117,7 @@
 
 
     <script src="js/cat_producto.js"></script>
-    <script src="js/productos.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             mostrarProductos(false); // Para no mostrar el botón de añadir en el index
