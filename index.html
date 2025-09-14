@@ -1,24 +1,19 @@
 <!doctype html>
 <html lang="es">
-  <head>
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Huerto Hogar</title>
     <link rel="stylesheet" href="css/estilo.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-  </head>
-  <body class="fondo_prin">
+</head>
+<body class="fondo_prin">
     
-
-    <!--titulo-->
     <div class="caja_titulo container-fluid text-center">
-
         <div class="row">
-
             <div class="col-3 text-start">
                 <h1 class="titulo">■ Huerto Hogar</h1>
             </div>
-
             <div class="col-3">
                 <a href="index.html" class="enlaces">Home</a> |
                 <a href="productos.html" class="enlaces">Productos</a> |
@@ -26,73 +21,55 @@
                 <a href="blogs.html" class="enlaces">Blogs</a> |
                 <a href="contacto.html" class="enlaces" >Contacto</a>
             </div>
-
             <div class="col-6 text-end">
                 <a href="carrito.html" class="enlaces">
-                    <img src="img/carrito.png" color="black"alt="Carrito de Compras"/> Carrito (<span id="cart-count">0</span>)
+                    <img src="img/carrito.png" color="black" alt="Carrito de Compras"/> Carrito (<span id="cart-count">0</span>)
                 </a>
             </div>
-
         </div>
-
-    </div>
-
-      <br>
-
-      <!--Botones inicio sesión-->
-      <div class="text-end pe-3"> <a href="login.html"> <button> Iniciar Sesión</button></a> |
-        <a href="registro.html"><button> Registrar Usuario </button> </a>
-      </div>
-
-      <!--texto HuertoHogar-->
-      <div class="container mt-5">
-      <div class="row align-items-center caja_tienda_online">
-          <div class="col-md-6">
-              <h2 class="titulo">TIENDA ONLINE</h2>
-              <p class="texto_pric">
-                  HuertoHogar es una tienda online dedicada a llevar la frescura y calidad de los productos del campo
-                  directamente a la puerta de nuestros clientes en Chile. Con más de 6 años de experiencia, operamos
-                  en más de 9 puntos a lo largo del país, incluyendo ciudades clave como Santiago, Puerto Montt,
-                  Villarica, Nacimiento, Viña del Mar, Valparaíso, y Concepción. Nuestra misión es conectar a las
-                  familias chilenas con el campo, promoviendo un estilo de vida saludable y sostenible.
-              </p>
-              <a href="productos.html"><button>Ver Productos</button></a>
-              
-          </div>
-          <div class="col-md-6 text-center">
-              <img src="img/Logo.png" alt="" width="500">
-          </div>  
-      </div>
     </div>
     <br>
-    <br>
-
-    <div class="container mt-4">
-      <div id="categoria-descripcion" class="text-center mb-4">
-        <h2></h2>
-        <p></p>
-      </div>
+    <div class="text-end pe-3">
+        <a href="login.html"><button>Iniciar Sesión</button></a> |
+        <a href="registro.html"><button>Registrar Usuario</button></a>
     </div>
     
-    <!--mostrar productos-->
-    <section class="mt-4 container">
-      <div class="row" id="contenedor-productos"></div>
-    </section>
-
-    <br>
-    <br>
-    
-    <!--Pie de pagina-->
-    <div class="caja_pie container-fluid text-center">
-
-        <div class="row">
-
-            <div class="col-3 text-end">
-
-                <h6 class="titulo text-start">Huerto Hogar</h6>
-
+    <div class="container mt-5">
+        <div class="row align-items-center caja_tienda_online">
+            <div class="col-md-6">
+                <h2 class="titulo">TIENDA ONLINE</h2>
+                <p class="texto_pric">
+                    HuertoHogar es una tienda online dedicada a llevar la frescura y calidad de los productos del campo
+                    directamente a la puerta de nuestros clientes en Chile. Con más de 6 años de experiencia, operamos
+                    en más de 9 puntos a lo largo del país, incluyendo ciudades clave como Santiago, Puerto Montt,
+                    Villarica, Nacimiento, Viña del Mar, Valparaíso, y Concepción. Nuestra misión es conectar a las
+                    familias chilenas con el campo, promoviendo un estilo de vida saludable y sostenible.
+                </p>
+                <a href="productos.html"><button>Ver Productos</button></a>
             </div>
-
+            <div class="col-md-6 text-center">
+                <img src="img/Logo.png" alt="" width="500">
+            </div>
+        </div>
+    </div>
+    
+    <div class="container mt-4">
+        <div id="categoria-descripcion" class="text-center mb-4">
+            <h2>Productos Destacados</h2>
+            <p>Una selección de los productos más populares y frescos de la temporada.</p>
+        </div>
+        
+        <section class="mt-4 container">
+            <div class="row" id="contenedor-productos">
+                </div>
+        </section>
+    </div>
+    
+    <div class="caja_pie container-fluid text-center">
+        <div class="row">
+            <div class="col-3 text-end">
+                <h6 class="titulo text-start">Huerto Hogar</h6>
+            </div>
             <div class="col-3">
                 <a href="#" onclick="productosPorCategoria('Frutas')" class="enlaces">Frutas</a> |
                 <a href="#" onclick="productosPorCategoria('Verdura Organicas')" class="enlaces">Verdura Orgánicas</a> |
@@ -100,30 +77,19 @@
                 <a href="#" onclick="productosPorCategoria('Productos Lacteos')" class="enlaces">Productos Lácteos</a> |
                 <a href="#" onclick="productosPorCategoria('todos')" class="enlaces">Todos los Productos</a>
             </div>
-
             <div class="row justify-content-end">
                 <div class="col-5">
-                <p>Subscribete a Huerto Hogar</p>
+                    <p>Subscribete a Huerto Hogar</p>
                     <div class="d-flex newsletter-form">
                         <input type="email" class="form-control" placeholder="Enter Email">
                         <button class="btn btn-secondary">Subscribir</button>
                     </div>
                 </div>
             </div>
-            
         </div>
-        
-    </div>  
-
-
-    <script src="js/cat_producto.js"></script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            mostrarProductos(false); // Para no mostrar el botón de añadir en el index
-            actualizarContadorCarrito();
-        });
-    </script>
+    </div>
+    
+    <script src="js/cat_producto.js" type="module"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-  </body>
+</body>
 </html>

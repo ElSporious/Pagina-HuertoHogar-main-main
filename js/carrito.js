@@ -1,24 +1,29 @@
-// Lista de productos predefinidos
-const productos = [
-    { id: 1, nombre: "Manzanas Fuji", descripcion: "Manzanas Fuji crujientes y dulces, cultivadas en el Valle del Maule.", precio: 1200, imagen: "Manzana.PNG", categoria:"Frutas"},
-    { id: 2, nombre: "Naranjas Valencia", descripcion: "Jugosas y ricas en vitamina C, estas naranjas Valencia son ideales para zumos frescos y refrescantes.", precio: 1000, imagen: "Naranjajajajjaja.PNG", categoria:"Frutas" },
-    { id: 3, nombre: "Plátanos Cavendish", descripcion: "Plátanos maduros y dulces, perfectos para el desayuno o como snack energético.", precio: 800, imagen: "Banana.png", categoria:"Frutas"},
-    { id: 4, nombre: "Zanahorias Orgánicas", descripcion: "Zanahorias crujientes cultivadas sin pesticidas en la Región de O'Higgins.", precio: 900, imagen: "Zanahoria.PNG", categoria:"Verdura Organicas"},
-    { id: 5, nombre: "Espinacas Frescas", descripcion: "Espinacas frescas y nutritivas, perfectas para ensaladas y batidos verdes.", precio: 700, imagen: "Espinaca.png", categoria:"Verdura Organicas" },
-    { id: 6, nombre: "Pimientos Tricolores ", descripcion: "Pimientos rojos, amarillos y verdes, ideales para salteados y platos coloridos.", precio: 1500, imagen: "Pimenton.PNG", categoria:"Verdura Organicas"},
-    { id: 7, nombre: "Miel Orgánica ", descripcion: "Miel pura y orgánica producida por apicultores locales.", precio: 900000, imagen: "Miel.png", categoria:"Productos Organicos"},
-    { id: 8, nombre: "Quinua Orgánica ", descripcion: "Quinua andina, un superalimento rico en proteínas, fibra y minerales.", precio: 800, imagen: "Quinoa.png", categoria:"Productos Organicos" },
-    { id: 9, nombre: "Leche Entera ", descripcion: "Leche fresca de granjas locales que se dedican a la producción responsable.", precio: 2700, imagen: "Leche.png", categoria:"Productos Lacteos"},
-];
+// Archivo: carrito.js
+import { productosIniciales } from './data.js';
+
+let productos = [];
 let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
 
 const cartList = document.getElementById('cart-list');
 const totalElement = document.getElementById('total-price');
 const cartCountElement = document.getElementById('cart-count');
 
+// Función de inicialización
+function inicializarProductos() {
+    const productosGuardados = localStorage.getItem('productos');
+    if (!productosGuardados) {
+        localStorage.setItem('productos', JSON.stringify(productosIniciales));
+        productos = productosIniciales;
+    } else {
+        productos = JSON.parse(productosGuardados);
+    }
+}
+
 // Agregar al carrito
 function agregarAlCarrito(id) {
     const producto = productos.find(p => p.id === id);
+    if (!producto) return;
+
     const item = carrito.find(i => i.id === id);
 
     if (item) {
@@ -63,8 +68,10 @@ function guardarCarrito() {
     localStorage.setItem('carrito', JSON.stringify(carrito));
 }
 
-// Mostrar carrito (¡Esta es la función modificada!)
+// Mostrar carrito
 function mostrarCarrito() {
+    if (!cartList || !totalElement || !cartCountElement) return;
+
     cartList.innerHTML = '';
     let totalItems = 0;
 
@@ -89,9 +96,9 @@ function mostrarCarrito() {
             <div class="text-end">
                 <span class="fw-bold">$${item.precio * item.cantidad}</span><br>
                 <div class="input-group input-group-sm mt-2">
-                    <button class="btn btn-outline-secondary" onclick="disminuirCantidad(${item.id})">-</button>
+                    <button class="btn btn-outline-secondary" onclick="disminuirCantidad('${item.id}')">-</button>
                     <input type="text" class="form-control text-center" value="${item.cantidad}" readonly style="width: 30px;">
-                    <button class="btn btn-outline-secondary" onclick="agregarAlCarrito(${item.id})">+</button>
+                    <button class="btn btn-outline-secondary" onclick="agregarAlCarrito('${item.id}')">+</button>
                 </div>
             </div>
         `;
@@ -105,4 +112,13 @@ function mostrarCarrito() {
 }
 
 // Inicializar
-mostrarCarrito();
+document.addEventListener('DOMContentLoaded', () => {
+    inicializarProductos();
+    mostrarCarrito();
+});
+
+// Expone las funciones al ámbito global para que sean accesibles desde el HTML
+window.agregarAlCarrito = agregarAlCarrito;
+window.disminuirCantidad = disminuirCantidad;
+window.eliminarDelCarrito = eliminarDelCarrito;
+window.vaciarCarrito = vaciarCarrito;
