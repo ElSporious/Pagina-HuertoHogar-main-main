@@ -18,22 +18,22 @@ document.addEventListener('DOMContentLoaded', () => {
     inicializarProductos();
     actualizarContadorCarrito();
 
-    // 1. Obtiene el ID del producto de la URL
+    // Obtiene el ID del producto de la URL
     const params = new URLSearchParams(window.location.search);
-    const productoId = parseInt(params.get('id'));
+    const productoId = params.get('id');
 
     let producto;
-    // 2. Si el ID existe, busca el producto en tu lista
+    // Busca el producto en tu lista
     if (productoId) {
         producto = productos.find(p => p.id === productoId);
     }
 
-    // 3. Si no se encuentra un ID o un producto válido, muestra el primer producto por defecto
+    // Si no se encuentra un ID, muestra el primer producto por defecto
     if (!producto) {
         producto = productos[0];
     }
     
-    // Ahora, renderiza el producto encontrado
+    // Renderiza el producto
     if (producto) {
         renderProducto(producto);
     }
@@ -47,7 +47,7 @@ function renderProducto(producto) {
     document.getElementById('mainImage').src = `img/${producto.imagen}`;
     document.getElementById('mainImage').alt = producto.nombre;
     document.getElementById('nombreProducto').textContent = producto.nombre;
-    document.getElementById('precioProducto').textContent = `$${producto.precio}`;
+    document.getElementById('precioProducto').textContent = `$${producto.precio.toLocaleString('es-CL')}`;
     document.getElementById('descripcionProducto').textContent = producto.descripcion;
 
     // Miniaturas
@@ -79,7 +79,6 @@ function renderProducto(producto) {
             img.style.width = '120px';
             img.alt = p.nombre;
             img.onclick = () => {
-                // Para que el enlace funcione, debes redirigir a la página de detalles
                 window.location.href = `detalle_producto.html?id=${p.id}`;
             };
             relContainer.appendChild(img);
@@ -104,8 +103,18 @@ function addToCart() {
     let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
     const itemEnCarrito = carrito.find(item => item.id === producto.id);
 
+    const cantidadEnCarrito = itemEnCarrito ? itemEnCarrito.cantidad : 0;
+    const stockDisponible = producto.stock;
+    const cantidadTotal = cantidadEnCarrito + cantidad;
+
+    // Validación para no exceder el stock
+    if (cantidadTotal > stockDisponible) {
+        alert(`No hay suficiente stock. Solo quedan ${stockDisponible - cantidadEnCarrito} unidades disponibles de ${producto.nombre}.`);
+        return;
+    }
+
     if (itemEnCarrito) {
-        itemEnCarrito.cantidad += cantidad;
+        itemEnCarrito.cantidad = cantidadTotal;
     } else {
         carrito.push({ ...producto, cantidad: cantidad });
     }

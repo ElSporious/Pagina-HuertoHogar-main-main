@@ -72,77 +72,86 @@ const regionesYComunas = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-
+    // Referencias a elementos del DOM
     const alternarBoton = document.getElementById('alternar_menu');
     const barraLateral = document.getElementById('barra_lateral');
     const contenidoPrincipal = document.getElementById('contenido_principal');
 
-    // Botones del menú
     const btnInicio = document.getElementById('btn-inicio');
     const btnUsuarios = document.getElementById('btn-usuarios');
     const btnInventario = document.getElementById('btn-inventario');
-    const btnMensajes = document.getElementById('btn-mensajes'); // Nuevo botón
+    const btnMensajes = document.getElementById('btn-mensajes');
+    const btnPedidos = document.getElementById('btn-pedidos');
 
-    // Secciones de contenido
     const seccionInicio = document.getElementById('seccion_inicio');
     const contenedorUsuarios = document.getElementById('contenedor_usuarios');
     const contenedorInventario = document.getElementById('contenedor_inventario');
-    const contenedorMensajes = document.getElementById('contenedor_mensajes'); // Nuevo contenedor
+    const contenedorMensajes = document.getElementById('contenedor_mensajes');
+    const contenedorPedidos = document.getElementById('contenedor_pedidos');
 
-    // Contenedores de vistas de inventario
     const vistaInventarioPrincipal = document.getElementById('vista_inventario_principal');
     const contenedorEditarProducto = document.getElementById('contenedor_editar_producto');
-
-    // Inicializa la lista de productos
-    inicializarProductos();
     
-    // Alternar la barra lateral
+    // Inicializar la aplicación
+    inicializarProductos();
+    inicializarPedidos();
+    
+    // Asignar eventos a los botones de navegación
     alternarBoton.addEventListener('click', () => {
         barraLateral.classList.toggle('colapsada');
         contenidoPrincipal.classList.toggle('expandido');
     });
 
-    // Función para mostrar la sección de inicio
     btnInicio.addEventListener('click', (e) => {
         e.preventDefault();
-        ocultarSecciones();
-        seccionInicio.classList.remove('d-none');
+        mostrarSeccion(seccionInicio);
     });
 
-    // Función para mostrar la sección de usuarios
     btnUsuarios.addEventListener('click', (e) => {
         e.preventDefault();
-        ocultarSecciones();
-        contenedorUsuarios.classList.remove('d-none');
+        mostrarSeccion(contenedorUsuarios);
         mostrarUsuarios();
     });
 
-    // Función para mostrar la sección de inventario
     btnInventario.addEventListener('click', (e) => {
         e.preventDefault();
-        ocultarSecciones();
-        contenedorInventario.classList.remove('d-none');
+        mostrarSeccion(contenedorInventario);
         cambiarVistaInventario('principal');
         listarProductos();
     });
 
-    // Función para mostrar la sección de mensajes (NUEVA)
     btnMensajes.addEventListener('click', (e) => {
         e.preventDefault();
-        ocultarSecciones();
-        contenedorMensajes.classList.remove('d-none');
+        mostrarSeccion(contenedorMensajes);
         mostrarMensajes();
     });
 
+    btnPedidos.addEventListener('click', (e) => {
+        e.preventDefault();
+        mostrarSeccion(contenedorPedidos);
+        mostrarPedidos();
+    });
+
     // Oculta todas las secciones
-    function ocultarSecciones() {
-        seccionInicio.classList.add('d-none');
-        contenedorUsuarios.classList.add('d-none');
-        contenedorInventario.classList.add('d-none');
-        contenedorMensajes.classList.add('d-none'); // Ocultar la nueva sección
+    function mostrarSeccion(seccionActiva) {
+        document.querySelectorAll('.contenido').forEach(seccion => {
+            seccion.classList.add('d-none');
+        });
+        seccionActiva.classList.remove('d-none');
     }
-    
-    // Función para alternar entre las vistas de inventario
+
+    // Funciones para gestión de Inventario
+    // ------------------------------------
+    function inicializarProductos() {
+        const productosGuardados = localStorage.getItem('productos');
+        if (!productosGuardados) {
+            localStorage.setItem('productos', JSON.stringify(productosIniciales));
+            productos = productosIniciales;
+        } else {
+            productos = JSON.parse(productosGuardados);
+        }
+    }
+
     function cambiarVistaInventario(vista) {
         if (vista === 'principal') {
             vistaInventarioPrincipal.classList.remove('d-none');
@@ -153,7 +162,292 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- CÓDIGO DE USUARIOS ---
+    function listarProductos() {
+        const productTableBody = document.getElementById('product-table-body');
+        if (!productTableBody) return;
+        
+        productTableBody.innerHTML = '';
+        const productos = JSON.parse(localStorage.getItem('productos')) || [];
+
+        if (productos.length === 0) {
+            productTableBody.innerHTML = '<tr><td colspan="7" class="text-center">No hay productos en el inventario.</td></tr>';
+            return;
+        }
+        
+        productos.forEach((producto) => {
+            let stockClase = '';
+            if (producto.stockCritico !== null && producto.stock <= producto.stockCritico) {
+                stockClase = 'text-danger fw-bold';
+            }
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><img src="img/${producto.imagen}" alt="${producto.nombre}" style="width: 50px; height: 50px;"></td>
+                <td>${producto.id}</td>
+                <td>${producto.nombre}</td>
+                <td>$${producto.precio.toLocaleString('es-CL')}</td>
+                <td><span class="${stockClase}">${producto.stock}</span></td>
+                <td>${producto.categoria}</td>
+                <td>
+                    <button class="btn btn-warning btn-sm btn-editar" data-id="${producto.id}">Editar</button>
+                    <button class="btn btn-danger btn-sm btn-eliminar" data-id="${producto.id}">Eliminar</button>
+                </td>
+            `;
+            productTableBody.appendChild(row);
+        });
+
+        // Añadir los event listeners DESPUÉS de que los botones se han creado
+        document.querySelectorAll('.btn-editar').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const id = e.target.dataset.id;
+                editarProducto(id);
+            });
+        });
+
+        document.querySelectorAll('.btn-eliminar').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const id = e.target.dataset.id;
+                eliminarProducto(id);
+            });
+        });
+    }
+
+    function agregarOEditarProducto(e) {
+        e.preventDefault();
+
+        const form = e.target;
+        const idProducto = form.querySelector('#idProducto').value.trim();
+        const nombre = form.querySelector('#nombre').value.trim();
+        const descripcion = form.querySelector('#descripcion').value.trim();
+        const precio = parseFloat(form.querySelector('#precio').value);
+        const stock = parseInt(form.querySelector('#stock').value, 10);
+        const stockCriticoInput = form.querySelector('#stockCritico');
+        const stockCritico = stockCriticoInput.value ? parseInt(stockCriticoInput.value, 10) : null;
+        const imagen = form.querySelector('#imagen').value.trim();
+        const categoria = form.querySelector('#categoria').value;
+
+        // Validaciones
+        if (idProducto.length < 3) {
+            alert("El código del producto debe tener al menos 3 caracteres.");
+            return;
+        }
+        if (nombre.length > 100) {
+            alert("El nombre no puede exceder los 100 caracteres.");
+            return;
+        }
+        if (descripcion.length > 500) {
+            alert("La descripción no puede exceder los 500 caracteres.");
+            return;
+        }
+        if (isNaN(precio) || precio < 0) {
+            alert("El precio debe ser un número igual o superior a 0.");
+            return;
+        }
+        if (isNaN(stock) || stock < 0) {
+            alert("El stock debe ser un número entero igual o superior a 0.");
+            return;
+        }
+        if (stockCriticoInput.value && (isNaN(stockCritico) || stockCritico < 0)) {
+            alert("El stock crítico debe ser un número entero igual o superior a 0.");
+            return;
+        }
+        if (!categoria) {
+            alert("Debe seleccionar una categoría.");
+            return;
+        }
+
+        const productos = JSON.parse(localStorage.getItem('productos')) || [];
+        const indiceProducto = productos.findIndex(p => p.id === idProducto);
+
+        if (indiceProducto !== -1) {
+            // Edición de producto existente
+            productos[indiceProducto] = {
+                id: idProducto,
+                nombre: nombre,
+                descripcion: descripcion,
+                precio: precio,
+                stock: stock,
+                stockCritico: stockCritico,
+                imagen: imagen,
+                categoria: categoria
+            };
+            alert("Producto actualizado exitosamente.");
+        } else {
+            // Creación de nuevo producto
+            const idExistente = productos.find(p => p.id === idProducto);
+            if (idExistente) {
+                alert('Ya existe un producto con este ID. Por favor, ingrese uno diferente.');
+                return;
+            }
+            productos.push({
+                id: idProducto,
+                nombre: nombre,
+                descripcion: descripcion,
+                precio: precio,
+                stock: stock,
+                stockCritico: stockCritico,
+                imagen: imagen,
+                categoria: categoria
+            });
+            alert("Producto agregado exitosamente.");
+        }
+
+        localStorage.setItem('productos', JSON.stringify(productos));
+        form.reset();
+        listarProductos();
+    }
+    
+    // Función para editar
+    function editarProducto(id) {
+        const productos = JSON.parse(localStorage.getItem('productos')) || [];
+        const productoAEditar = productos.find(p => p.id === id);
+        if (!productoAEditar) return;
+        
+        cambiarVistaInventario('editar');
+        const formContainer = document.getElementById('product-edit-form-container');
+        
+        formContainer.innerHTML = `
+            <div class="card-body">
+                <form id="product-edit-form">
+                    <input type="hidden" id="producto-id" value="${productoAEditar.id}">
+                    <div class="mb-3">
+                        <label for="edit-id" class="form-label">Código producto</label>
+                        <input type="text" class="form-control" id="edit-id" value="${productoAEditar.id}" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-nombre" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="edit-nombre" value="${productoAEditar.nombre}" maxlength="100" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-descripcion" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="edit-descripcion" rows="2" maxlength="500">${productoAEditar.descripcion}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-precio" class="form-label">Precio (CLP)</label>
+                        <input type="number" class="form-control" id="edit-precio" value="${productoAEditar.precio}" min="0" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-stock" class="form-label">Stock</label>
+                        <input type="number" class="form-control" id="edit-stock" value="${productoAEditar.stock}" min="0" step="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-stockCritico" class="form-label">Stock Crítico (Opcional)</label>
+                        <input type="number" class="form-control" id="edit-stockCritico" value="${productoAEditar.stockCritico !== null ? productoAEditar.stockCritico : ''}" min="0" step="1">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-imagen" class="form-label">Nombre de la Imagen</label>
+                        <input type="text" class="form-control" id="edit-imagen" value="${productoAEditar.imagen}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-categoria" class="form-label">Categoría</label>
+                        <select class="form-select" id="edit-categoria" required>
+                            <option value="Frutas">Frutas</option>
+                            <option value="Verdura Organicas">Verdura Orgánicas</option>
+                            <option value="Productos Organicos">Productos Orgánicos</option>
+                            <option value="Productos Lacteos">Productos Lácteos</option>
+                        </select>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-warning">Guardar Cambios</button>
+                        <button type="button" id="btn-cancelar-edicion-producto" class="btn btn-secondary">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        `;
+
+        document.getElementById('edit-categoria').value = productoAEditar.categoria;
+
+        document.getElementById('product-edit-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const id = form.querySelector('#producto-id').value;
+            const nombre = form.querySelector('#edit-nombre').value.trim();
+            const descripcion = form.querySelector('#edit-descripcion').value.trim();
+            const precio = parseFloat(form.querySelector('#edit-precio').value);
+            const stock = parseInt(form.querySelector('#edit-stock').value, 10);
+            const stockCriticoInput = form.querySelector('#edit-stockCritico');
+            const stockCritico = stockCriticoInput.value ? parseInt(stockCriticoInput.value, 10) : null;
+            const imagen = form.querySelector('#edit-imagen').value.trim();
+            const categoria = form.querySelector('#edit-categoria').value;
+
+            // Validaciones (similares a agregar)
+            if (nombre.length > 100) {
+                alert("El nombre no puede exceder los 100 caracteres.");
+                return;
+            }
+            if (descripcion.length > 500) {
+                alert("La descripción no puede exceder los 500 caracteres.");
+                return;
+            }
+            if (isNaN(precio) || precio < 0) {
+                alert("El precio debe ser un número igual o superior a 0.");
+                return;
+            }
+            if (isNaN(stock) || stock < 0) {
+                alert("El stock debe ser un número entero igual o superior a 0.");
+                return;
+            }
+            if (stockCriticoInput.value && (isNaN(stockCritico) || stockCritico < 0)) {
+                alert("El stock crítico debe ser un número entero igual o superior a 0.");
+                return;
+            }
+            if (!categoria) {
+                alert("Debe seleccionar una categoría.");
+                return;
+            }
+
+            const productos = JSON.parse(localStorage.getItem('productos')) || [];
+            const index = productos.findIndex(p => p.id === id);
+            
+            if (index !== -1) {
+                productos[index] = {
+                    id: id,
+                    nombre: nombre,
+                    descripcion: descripcion,
+                    precio: precio,
+                    stock: stock,
+                    stockCritico: stockCritico,
+                    imagen: imagen,
+                    categoria: categoria
+                };
+                localStorage.setItem('productos', JSON.stringify(productos));
+                alert('Producto actualizado exitosamente.');
+                cambiarVistaInventario('principal');
+                listarProductos();
+            }
+        });
+
+        document.getElementById('btn-cancelar-edicion-producto').addEventListener('click', () => {
+            cambiarVistaInventario('principal');
+            listarProductos();
+        });
+    }
+    
+    // Función para eliminar
+    function eliminarProducto(id) {
+        const productos = JSON.parse(localStorage.getItem('productos')) || [];
+        const productoAEliminar = productos.find(p => p.id === id);
+
+        if (!productoAEliminar) {
+            alert("Producto no encontrado.");
+            return;
+        }
+        
+        if (confirm(`¿Estás seguro de que deseas eliminar el producto: ${productoAEliminar.nombre}?`)) {
+            const nuevosProductos = productos.filter(p => p.id !== id);
+            localStorage.setItem('productos', JSON.stringify(nuevosProductos));
+            alert('Producto eliminado correctamente.');
+            listarProductos();
+        }
+    }
+    
+    const productForm = document.getElementById('product-form');
+    if (productForm) {
+        productForm.addEventListener('submit', agregarOEditarProducto);
+    }
+    
+    // Funciones para gestión de Usuarios
+    // ------------------------------------
     function mostrarUsuarios() {
         const usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
         
@@ -162,19 +456,20 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="d-flex justify-content-end mb-3">
                 <a href="admin-registro.html" class="btn btn-success">Nuevo Usuario</a>
             </div>
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>RUT</th>
-                        <th>Correo</th>
-                        <th>Dirección</th>
-                        <th>Región</th>
-                        <th>Comuna</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>RUT</th>
+                            <th>Correo</th>
+                            <th>Dirección</th>
+                            <th>Región</th>
+                            <th>Comuna</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
         `;
 
         if (usuarios.length > 0) {
@@ -203,72 +498,73 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         htmlContenido += `
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         `;
         
         contenedorUsuarios.innerHTML = htmlContenido;
-
-        const botonesEliminar = document.querySelectorAll('.btn-eliminar-usuario');
-        botonesEliminar.forEach(boton => {
+        
+        document.querySelectorAll('.btn-eliminar-usuario').forEach(boton => {
             boton.addEventListener('click', (e) => {
                 const index = e.target.dataset.index;
                 eliminarUsuario(index);
             });
         });
         
-        const botonesEditar = document.querySelectorAll('.btn-editar-usuario');
-        botonesEditar.forEach(boton => {
+        document.querySelectorAll('.btn-editar-usuario').forEach(boton => {
             boton.addEventListener('click', (e) => {
                 const index = e.target.dataset.index;
-                cargarFormularioEdicion(index);
+                cargarFormularioEdicionUsuario(index);
             });
         });
     }
 
-    function cargarFormularioEdicion(index) {
+    function cargarFormularioEdicionUsuario(index) {
         const usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
         const usuarioAEditar = usuarios[index];
     
         let htmlFormulario = `
             <h5 class="titulo">Editar Usuario</h5>
-            <form id="form-editar-usuario">
-                <input type="hidden" id="usuario-index" value="${index}">
-                <div class="mb-3">
-                    <label for="nombreCompleto" class="form-label">NOMBRE COMPLETO</label>
-                    <input type="text" class="form-control" id="nombreCompleto" value="${usuarioAEditar.nombre}">
-                </div>
-                <div class="mb-3">
-                    <label for="rut" class="form-label">RUT</label>
-                    <input type="text" class="form-control" id="rut" value="${usuarioAEditar.rut}" disabled>
-                </div>
-                <div class="mb-3">
-                    <label for="correo" class="form-label">CORREO</label>
-                    <input type="email" class="form-control" id="correo" value="${usuarioAEditar.correo}">
-                </div>
-                <div class="mb-3">
-                    <label for="direccion" class="form-label">DIRECCIÓN</label>
-                    <input type="text" class="form-control" id="direccion" value="${usuarioAEditar.direccion}">
-                </div>
-                <div class="mb-3">
-                    <label for="telefono" class="form-label">TELÉFONO (opcional)</label>
-                    <input type="tel" class="form-control" id="telefono" value="${usuarioAEditar.telefono}">
-                </div>
-                <div class="row mb-4">
-                    <div class="col-6">
-                        <label for="region" class="form-label">Región</label>
-                        <select class="form-select" id="region"></select>
+            <div class="card p-3">
+                <form id="form-editar-usuario">
+                    <input type="hidden" id="usuario-index" value="${index}">
+                    <div class="mb-3">
+                        <label for="nombreCompleto" class="form-label">NOMBRE COMPLETO</label>
+                        <input type="text" class="form-control" id="nombreCompleto" value="${usuarioAEditar.nombre}">
                     </div>
-                    <div class="col-6">
-                        <label for="comuna" class="form-label">Comuna</label>
-                        <select class="form-select" id="comuna"></select>
+                    <div class="mb-3">
+                        <label for="rut" class="form-label">RUT</label>
+                        <input type="text" class="form-control" id="rut" value="${usuarioAEditar.rut}" disabled>
                     </div>
-                </div>
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-warning">Guardar Cambios</button>
-                    <button type="button" id="btn-cancelar-edicion" class="btn btn-secondary">Cancelar</button>
-                </div>
-            </form>
+                    <div class="mb-3">
+                        <label for="correo" class="form-label">CORREO</label>
+                        <input type="email" class="form-control" id="correo" value="${usuarioAEditar.correo}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="direccion" class="form-label">DIRECCIÓN</label>
+                        <input type="text" class="form-control" id="direccion" value="${usuarioAEditar.direccion}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="telefono" class="form-label">TELÉFONO (opcional)</label>
+                        <input type="tel" class="form-control" id="telefono" value="${usuarioAEditar.telefono}">
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-6">
+                            <label for="region" class="form-label">Región</label>
+                            <select class="form-select" id="region"></select>
+                        </div>
+                        <div class="col-6">
+                            <label for="comuna" class="form-label">Comuna</label>
+                            <select class="form-select" id="comuna"></select>
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-warning">Guardar Cambios</button>
+                        <button type="button" id="btn-cancelar-edicion" class="btn btn-secondary">Cancelar</button>
+                    </div>
+                </form>
+            </div>
         `;
         
         contenedorUsuarios.innerHTML = htmlFormulario;
@@ -285,11 +581,11 @@ document.addEventListener('DOMContentLoaded', () => {
             llenarComunas(e.target.value, selectComuna);
         });
     
-        formEditarUsuario.addEventListener('submit', manejarEdicion);
+        formEditarUsuario.addEventListener('submit', manejarEdicionUsuario);
         btnCancelarEdicion.addEventListener('click', mostrarUsuarios);
     }
 
-    function manejarEdicion(e) {
+    function manejarEdicionUsuario(e) {
         e.preventDefault();
         
         const form = e.target;
@@ -393,196 +689,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // --- CÓDIGO PARA PRODUCTOS ---
-    function inicializarProductos() {
-        const productosGuardados = localStorage.getItem('productos');
-        if (!productosGuardados) {
-            localStorage.setItem('productos', JSON.stringify(productosIniciales));
-            productos = productosIniciales;
-        } else {
-            productos = JSON.parse(productosGuardados);
-        }
-    }
-
-    function listarProductos() {
-        const productListBody = document.getElementById('product-table-body');
-        if (!productListBody) return;
-        
-        productListBody.innerHTML = '';
-    
-        if (productos.length === 0) {
-            productListBody.innerHTML = '<tr><td colspan="6" class="text-center">No hay productos en el inventario.</td></tr>';
-            return;
-        }
-    
-        productos.forEach((producto, index) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td><img src="img/${producto.imagen}" alt="${producto.nombre}" style="width: 50px; height: 50px;"></td>
-                <td>${producto.id}</td>
-                <td>${producto.nombre}</td>
-                <td>$${producto.precio}</td>
-                <td>${producto.categoria}</td>
-                <td>
-                    <button class="btn btn-warning btn-sm btn-editar-producto" data-index="${index}">Editar</button>
-                    <button class="btn btn-danger btn-sm btn-eliminar-producto" data-index="${index}">Eliminar</button>
-                </td>
-            `;
-            productListBody.appendChild(row);
-        });
-    
-        document.querySelectorAll('.btn-eliminar-producto').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const index = e.target.dataset.index;
-                eliminarProducto(index);
-            });
-        });
-        
-        document.querySelectorAll('.btn-editar-producto').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const index = e.target.dataset.index;
-                cargarFormularioEdicionProducto(index);
-            });
-        });
-    }
-
-    function crearProducto(event) {
-        event.preventDefault();
-
-        const form = document.getElementById('product-form');
-        
-        const idProducto = form.querySelector('#idProducto').value.trim();
-
-        if (!idProducto) {
-            alert('El ID del producto no puede estar vacío.');
-            return;
-        }
-
-        const idExistente = productos.find(p => p.id === idProducto);
-        if (idExistente) {
-            alert('Ya existe un producto con este ID. Por favor, ingrese uno diferente.');
-            return;
-        }
-        
-        const nuevoProducto = {
-            id: idProducto,
-            nombre: form.nombre.value,
-            descripcion: form.descripcion.value,
-            precio: parseInt(form.precio.value),
-            imagen: form.imagen.value,
-            categoria: form.categoria.value
-        };
-
-        productos.push(nuevoProducto);
-        localStorage.setItem('productos', JSON.stringify(productos));
-        listarProductos();
-        form.reset();
-    }
-    
-    function eliminarProducto(index) {
-        if (confirm(`¿Estás seguro de que deseas eliminar el producto: ${productos[index].nombre}?`)) {
-            productos.splice(index, 1);
-            localStorage.setItem('productos', JSON.stringify(productos));
-            alert('Producto eliminado correctamente.');
-            listarProductos();
-        }
-    }
-    
-    function cargarFormularioEdicionProducto(index) {
-        cambiarVistaInventario('editar');
-
-        const productoAEditar = productos[index];
-        const formContainer = document.getElementById('product-edit-form-container');
-        
-        formContainer.innerHTML = `
-            <div class="card-body">
-                <form id="product-edit-form">
-                    <input type="hidden" id="producto-index" value="${index}">
-                    <div class="mb-3">
-                        <label for="edit-id" class="form-label">ID del Producto</label>
-                        <input type="text" class="form-control" id="edit-id" value="${productoAEditar.id}" disabled>
-                    </div>
-                    <div class="mb-3">
-                        <label for="edit-nombre" class="form-label">Nombre del Producto</label>
-                        <input type="text" class="form-control" id="edit-nombre" value="${productoAEditar.nombre}" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="edit-descripcion" class="form-label">Descripción</label>
-                        <textarea class="form-control" id="edit-descripcion" rows="2" required>${productoAEditar.descripcion}</textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label for="edit-precio" class="form-label">Precio (CLP)</label>
-                        <input type="number" class="form-control" id="edit-precio" value="${productoAEditar.precio}" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="edit-imagen" class="form-label">Nombre de la Imagen</label>
-                        <input type="text" class="form-control" id="edit-imagen" value="${productoAEditar.imagen}" required>
-                        <small class="form-text text-muted">Ej: Manzana.PNG</small>
-                    </div>
-                    <div class="mb-3">
-                        <label for="edit-categoria" class="form-label">Categoría</label>
-                        <select class="form-select" id="edit-categoria" required>
-                            <option value="Frutas">Frutas</option>
-                            <option value="Verdura Organicas">Verdura Orgánicas</option>
-                            <option value="Productos Organicos">Productos Orgánicos</option>
-                            <option value="Productos Lacteos">Productos Lácteos</option>
-                        </select>
-                    </div>
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-warning">Guardar Cambios</button>
-                        <button type="button" id="btn-cancelar-edicion-producto" class="btn btn-secondary">Cancelar</button>
-                    </div>
-                </form>
-            </div>
-        `;
-
-        // Seleccionar la categoría correcta
-        document.getElementById('edit-categoria').value = productoAEditar.categoria;
-
-        // Añadir event listeners al nuevo formulario
-        document.getElementById('product-edit-form').addEventListener('submit', manejarEdicionProducto);
-        document.getElementById('btn-cancelar-edicion-producto').addEventListener('click', () => {
-            cambiarVistaInventario('principal');
-            listarProductos();
-        });
-    }
-    
-    function manejarEdicionProducto(event) {
-        event.preventDefault();
-        
-        const form = event.target;
-        const index = form.querySelector('#producto-index').value;
-        const nombre = form.querySelector('#edit-nombre').value.trim();
-        const descripcion = form.querySelector('#edit-descripcion').value.trim();
-        const precio = parseInt(form.querySelector('#edit-precio').value);
-        const imagen = form.querySelector('#edit-imagen').value.trim();
-        const categoria = form.querySelector('#edit-categoria').value;
-    
-        if (nombre === '' || descripcion === '' || isNaN(precio) || imagen === '' || categoria === '') {
-            alert('Por favor, completa todos los campos.');
-            return;
-        }
-
-        productos[index].nombre = nombre;
-        productos[index].descripcion = descripcion;
-        productos[index].precio = precio;
-        productos[index].imagen = imagen;
-        productos[index].categoria = categoria;
-    
-        localStorage.setItem('productos', JSON.stringify(productos));
-    
-        alert('Producto actualizado exitosamente.');
-        cambiarVistaInventario('principal');
-        listarProductos();
-    }
-    
-    const productForm = document.getElementById('product-form');
-    if (productForm) {
-        productForm.addEventListener('submit', crearProducto);
-    }
-    // --- FIN CÓDIGO PARA PRODUCTOS ---
-
-    // --- CÓDIGO PARA MENSAJES DE CONTACTO ---
+    // Funciones para gestión de Mensajes de Contacto
+    // ------------------------------------
     function mostrarMensajes() {
         const mensajes = JSON.parse(localStorage.getItem('mensajesContacto')) || [];
         const mensajesTableBody = document.getElementById('mensajes-table-body');
@@ -608,7 +716,62 @@ document.addEventListener('DOMContentLoaded', () => {
             mensajesTableBody.appendChild(row);
         });
     }
-    // --- FIN CÓDIGO PARA MENSAJES DE CONTACTO ---
 
-    seccionInicio.classList.remove('d-none');
+    // Funciones para gestión de Pedidos
+    // ------------------------------------
+    function inicializarPedidos() {
+        const pedidosGuardados = localStorage.getItem('pedidos');
+        if (!pedidosGuardados) {
+            // Datos de prueba para pedidos
+            const pedidosDePrueba = [
+                {
+                    id: 1,
+                    usuario: "juan.perez@gmail.com",
+                    fecha: "2025-05-10",
+                    productos: "Manzanas Fuji (2), Plátanos (1)",
+                    direccion: "Calle Falsa 123",
+                    total: 3200
+                },
+                {
+                    id: 2,
+                    usuario: "maria.lopez@duoc.cl",
+                    fecha: "2025-05-11",
+                    productos: "Espinacas (1), Miel (1)",
+                    direccion: "Avenida Siempre Viva 456",
+                    total: 900700
+                }
+            ];
+            localStorage.setItem('pedidos', JSON.stringify(pedidosDePrueba));
+        }
+    }
+
+    function mostrarPedidos() {
+        const pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
+        const pedidosTableBody = document.getElementById('pedidos-table-body');
+
+        if (!pedidosTableBody) return;
+
+        pedidosTableBody.innerHTML = '';
+
+        if (pedidos.length === 0) {
+            pedidosTableBody.innerHTML = '<tr><td colspan="6" class="text-center">No hay pedidos registrados.</td></tr>';
+            return;
+        }
+
+        pedidos.forEach(pedido => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${pedido.id}</td>
+                <td>${pedido.usuario}</td>
+                <td>${pedido.fecha}</td>
+                <td>${pedido.productos}</td>
+                <td>${pedido.direccion}</td>
+                <td>$${pedido.total.toLocaleString('es-CL')}</td>
+            `;
+            pedidosTableBody.appendChild(row);
+        });
+    }
+
+    // Al cargar la página, mostrar la sección de inicio por defecto
+    mostrarSeccion(seccionInicio);
 });
