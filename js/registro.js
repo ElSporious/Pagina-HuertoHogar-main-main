@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectRegion = document.getElementById('region');
     const selectComuna = document.getElementById('comuna');
 
-    // 1. Mueve el objeto y las funciones FUERA del evento 'submit'
     const regionesYComunas = {
         "Región Metropolitana de Santiago": [
             "Cerrillos", "Cerro Navia", "Conchalí", "El Bosque", "Estación Central",
@@ -72,7 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ]
     };
 
-    // Función para llenar las regiones en el select
     function llenarRegiones() {
         const opcionDefaultRegion = document.createElement('option');
         opcionDefaultRegion.textContent = "-- Seleccione la región --";
@@ -87,7 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Función para llenar las comunas según la región seleccionada
     function llenarComunas(regionSeleccionada) {
         selectComuna.innerHTML = '';
         const opcionDefaultComuna = document.createElement('option');
@@ -105,7 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 2. Ejecuta la lógica al cargar la página
     llenarRegiones();
     llenarComunas();
 
@@ -113,36 +109,43 @@ document.addEventListener('DOMContentLoaded', () => {
         llenarComunas(e.target.value);
     });
 
-    // 3. Mantiene el resto de tu lógica de validación DENTRO del evento 'submit'
     formRegistro.addEventListener('submit', (e) => {
         e.preventDefault();
 
-        // Captura de los valores de los campos
         const nombre = document.getElementById('nombreCompleto').value.trim();
+        const rut = document.getElementById('rut').value.trim();
         const correo = document.getElementById('correo').value.trim();
         const confirmarCorreo = document.getElementById('confirmarCorreo').value.trim();
         const contrasena = document.getElementById('contrasena').value.trim();
         const confirmarContrasena = document.getElementById('confirmarContrasena').value.trim();
+        const direccion = document.getElementById('direccion').value.trim();
         const telefono = document.getElementById('telefono').value.trim();
         const region = document.getElementById('region').value;
         const comuna = document.getElementById('comuna').value;
 
-        // Expresiones regulares
         const correoRegex = /@(duoc\.cl|profesor\.duoc\.cl|gmail\.com)$/;
+        const direccionRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+\s+\d+$/; 
+        const rutRegex = /^\d{1,2}\.\d{3}\.\d{3}\-[\dkK]$/;
 
-        // ... (El resto de tus validaciones) ...
-
-        // Validación de que se ha seleccionado una región y comuna
-        if (region === "" || comuna === "") {
-            alert('Por favor, selecciona una región y una comuna.');
-            return;
-        }
-
-        if (nombre === '' || correo === '' || confirmarCorreo === '' || contrasena === '' || confirmarContrasena === '') {
+        // Validaciones de campos vacíos
+        if (nombre === '' || rut === '' || correo === '' || confirmarCorreo === '' || contrasena === '' || confirmarContrasena === '' || direccion === '') {
             alert('Por favor, completa todos los campos obligatorios.');
             return;
         }
 
+        // Validación de RUT simplificada
+        if (!rutRegex.test(rut)) {
+            alert('El RUT ingresado no es válido. Utiliza el formato xx.xxx.xxx-k.');
+            return;
+        }
+
+        // Validación de dirección
+        if (!direccionRegex.test(direccion)) {
+            alert('La dirección debe tener el formato "nombre de la calle número".');
+            return;
+        }
+
+        // Resto de las validaciones
         if (correo !== confirmarCorreo) {
             alert('El correo y la confirmación de correo no coinciden.');
             return;
@@ -153,50 +156,55 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        //if largo de contraselas
         if (contrasena.length < 4 || contrasena.length > 10) {
             alert('La contraseña debe tener entre 4 y 10 caracteres.');
             return;
         }
 
-        //if de largo del correo
         if (correo.length > 100){
-            alert('El correo no puede superar los 100 caracteres')
+            alert('El correo no puede superar los 100 caracteres');
             return;
         }
 
-        //if de RegexCorreo
         if (!correoRegex.test(correo)) {
             alert('El correo electrónico debe terminar en @duoc.cl, @profesor.duoc.cl o @gmail.com');
             return;
         }
 
-        // Recuperar usuarios existentes o inicializar un array vacío
+        if (region === "" || comuna === "") {
+            alert('Por favor, selecciona una región y una comuna.');
+            return;
+        }
+
         const usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
 
-        // Verificar si el correo ya existe
         const usuarioExistente = usuarios.find(user => user.correo === correo);
         if (usuarioExistente) {
             alert('Este correo ya está registrado.');
             return;
         }
 
-        // Crear el objeto del nuevo usuario
         const nuevoUsuario = {
             nombre,
+            rut,
             correo,
             contrasena,
+            direccion,
             telefono,
             region,
             comuna
         };
 
-        // Agregar el nuevo usuario al array y guardarlo en localStorage
         usuarios.push(nuevoUsuario);
         localStorage.setItem('usuarios', JSON.stringify(usuarios));
 
-        alert('¡Registro exitoso! Ya puedes iniciar sesión.');
-        formRegistro.reset(); // Limpia el formulario
-        window.location.href = 'login.html'; // Redirige a la página de login
+        // Redirecciona según la página actual
+        if (window.location.pathname.endsWith('admin-registro.html')) {
+            alert('¡Usuario creado exitosamente!');
+            window.location.href = 'admin.html';
+        } else {
+            alert('¡Registro exitoso! Ya puedes iniciar sesión.');
+            window.location.href = 'login.html';
+        }
     });
 });
