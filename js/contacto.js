@@ -36,13 +36,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const datosContacto = {
+            id: Date.now(),
             nombre: nombreCompleto,
             email: correo,
             mensaje: mensaje,
             fechaEnvio: new Date().toLocaleString()
         };
 
-        localStorage.setItem('formularioContacto', JSON.stringify(datosContacto));
+        // Obtiene la lista de mensajes existente o crea una nueva
+        let mensajes = JSON.parse(localStorage.getItem('mensajesContacto')) || [];
+        
+        // Agrega el nuevo mensaje a la lista
+        mensajes.push(datosContacto);
+
+        // Guarda la lista actualizada en localStorage
+        localStorage.setItem('mensajesContacto', JSON.stringify(mensajes));
 
         alert('Mensaje enviado y datos guardados. ¡Gracias por contactarnos!');
         formContacto.reset();

@@ -22,6 +22,7 @@
             <li><a href="#" id="btn-inicio"><i class="fas fa-house"></i> Inicio</a></li>
             <li><a href="#" id="btn-inventario"><i class="fas fa-boxes"></i> Inventario</a></li>
             <li><a href="#" id="btn-usuarios"><i class="fas fa-users"></i> Usuarios</a></li>
+            <li><a href="#" id="btn-mensajes"><i class="fas fa-envelope"></i> Mensajes</a></li>
         </ul>
 
         <div class="barra_lateral-pie">
@@ -45,6 +46,25 @@
         </div>
 
         <div id="contenedor_usuarios" class="contenido mt-4 d-none"></div>
+
+        <div id="contenedor_mensajes" class="contenido mt-4 d-none">
+            <h5 class="titulo">Bandeja de Mensajes de Contacto</h5>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Correo</th>
+                            <th>Mensaje</th>
+                            <th>Fecha de Envío</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mensajes-table-body">
+                        </tbody>
+                </table>
+            </div>
+        </div>
         
         <div id="contenedor_inventario" class="contenido mt-4 d-none">
             <h5 class="titulo">Gestión de Inventario</h5>
@@ -119,7 +139,6 @@
                     </div>
             </div>
         </div>
-
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

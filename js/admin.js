@@ -81,11 +81,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnInicio = document.getElementById('btn-inicio');
     const btnUsuarios = document.getElementById('btn-usuarios');
     const btnInventario = document.getElementById('btn-inventario');
+    const btnMensajes = document.getElementById('btn-mensajes'); // Nuevo botón
 
     // Secciones de contenido
     const seccionInicio = document.getElementById('seccion_inicio');
     const contenedorUsuarios = document.getElementById('contenedor_usuarios');
     const contenedorInventario = document.getElementById('contenedor_inventario');
+    const contenedorMensajes = document.getElementById('contenedor_mensajes'); // Nuevo contenedor
 
     // Contenedores de vistas de inventario
     const vistaInventarioPrincipal = document.getElementById('vista_inventario_principal');
@@ -124,11 +126,20 @@ document.addEventListener('DOMContentLoaded', () => {
         listarProductos();
     });
 
+    // Función para mostrar la sección de mensajes (NUEVA)
+    btnMensajes.addEventListener('click', (e) => {
+        e.preventDefault();
+        ocultarSecciones();
+        contenedorMensajes.classList.remove('d-none');
+        mostrarMensajes();
+    });
+
     // Oculta todas las secciones
     function ocultarSecciones() {
         seccionInicio.classList.add('d-none');
         contenedorUsuarios.classList.add('d-none');
         contenedorInventario.classList.add('d-none');
+        contenedorMensajes.classList.add('d-none'); // Ocultar la nueva sección
     }
     
     // Función para alternar entre las vistas de inventario
@@ -570,6 +581,34 @@ document.addEventListener('DOMContentLoaded', () => {
         productForm.addEventListener('submit', crearProducto);
     }
     // --- FIN CÓDIGO PARA PRODUCTOS ---
+
+    // --- CÓDIGO PARA MENSAJES DE CONTACTO ---
+    function mostrarMensajes() {
+        const mensajes = JSON.parse(localStorage.getItem('mensajesContacto')) || [];
+        const mensajesTableBody = document.getElementById('mensajes-table-body');
+        
+        if (!mensajesTableBody) return;
+
+        mensajesTableBody.innerHTML = '';
+
+        if (mensajes.length === 0) {
+            mensajesTableBody.innerHTML = '<tr><td colspan="5" class="text-center">No hay mensajes de contacto.</td></tr>';
+            return;
+        }
+
+        mensajes.forEach(mensaje => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${mensaje.id}</td>
+                <td>${mensaje.nombre}</td>
+                <td>${mensaje.email}</td>
+                <td>${mensaje.mensaje}</td>
+                <td>${mensaje.fechaEnvio}</td>
+            `;
+            mensajesTableBody.appendChild(row);
+        });
+    }
+    // --- FIN CÓDIGO PARA MENSAJES DE CONTACTO ---
 
     seccionInicio.classList.remove('d-none');
 });
