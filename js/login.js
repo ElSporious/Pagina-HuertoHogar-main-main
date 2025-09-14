@@ -12,6 +12,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const correo = inputCorreo.value.trim();
         const contrasena = inputContrasena.value.trim();
 
+        // **Añade la condición para el administrador aquí**
+        if (correo === 'huertohogar@gmail.com' && contrasena === 'admin123') {
+            alert('¡Bienvenido, Administrador!');
+            window.location.href = 'admin.html'; // Redirige a la página de administrador
+            return; // Detiene la ejecución del resto del código
+        }
+
         const usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
 
         // Busca al usuario en la lista de usuarios guardados
