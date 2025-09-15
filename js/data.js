@@ -4,9 +4,9 @@ export const productosIniciales = [
     { 
         id: "MAN1", 
         nombre: "Manzanas Fuji", 
-        descripcion: "Manzanas Fuji crujientes y dulces, cultivadas en el Valle del Maule.", 
+        descripcion: "Manzanas Fuji crujientes y dulces, cultivadas en el Valle del Maule. Perfectas para meriendas saludables o como ingrediente en postres. Estas manzanas son conocidas por su textura firme y su sabor equilibrado entre dulce y ácido. (Venta por Kilos)", 
         precio: 1200, 
-        stock: 50, 
+        stock: 150, 
         stockCritico: 10,
         imagen: "Manzana.PNG", 
         categoria: "Frutas"
@@ -14,9 +14,9 @@ export const productosIniciales = [
     { 
         id: "NAR2", 
         nombre: "Naranjas Valencia", 
-        descripcion: "Jugosas y ricas en vitamina C, estas naranjas Valencia son ideales para zumos frescos y refrescantes.", 
+        descripcion: "Jugosas y ricas en vitamina C, estas naranjas Valencia son ideales para zumos frescos y refrescantes. Cultivadas en condiciones climáticas óptimas que aseguran su dulzura y jugosidad. (Venta por Kilos)", 
         precio: 1000, 
-        stock: 25, 
+        stock: 200, 
         stockCritico: 5,
         imagen: "Naranjajajajjaja.PNG", 
         categoria: "Frutas"
@@ -24,9 +24,9 @@ export const productosIniciales = [
     { 
         id: "PLA3", 
         nombre: "Plátanos Cavendish", 
-        descripcion: "Plátanos maduros y dulces, perfectos para el desayuno o como snack energético.", 
+        descripcion: "Plátanos maduros y dulces, perfectos para el desayuno o como snack energético. Estos plátanos son ricos en potasio y vitaminas, ideales para mantener una dieta equilibrada. (Venta por Kilos)", 
         precio: 800, 
-        stock: 0, 
+        stock: 250, 
         stockCritico: 5,
         imagen: "Banana.png", 
         categoria: "Frutas"
@@ -34,9 +34,9 @@ export const productosIniciales = [
     { 
         id: "ZAN4", 
         nombre: "Zanahorias Orgánicas", 
-        descripcion: "Zanahorias crujientes cultivadas sin pesticidas en la Región de O'Higgins.", 
+        descripcion: "Zanahorias crujientes cultivadas sin pesticidas en la Región de O'Higgins. Excelente fuente de vitamina A y fibra, ideales para ensaladas, jugos o como snack saludable. (Venta por Kilos)", 
         precio: 900, 
-        stock: 35,
+        stock: 100,
         stockCritico: 10,
         imagen: "Zanahoria.PNG", 
         categoria: "Verdura Organicas"
@@ -44,9 +44,9 @@ export const productosIniciales = [
     { 
         id: "ESP5", 
         nombre: "Espinacas Frescas", 
-        descripcion: "Espinacas frescas y nutritivas, perfectas para ensaladas y batidos verdes.", 
+        descripcion: "Espinacas frescas y nutritivas, perfectas para ensaladas y batidos verdes. Estas espinacas son cultivadas bajo prácticas orgánicas que garantizan su calidad y valor nutricional. (Venta por bolsa de 500g)", 
         precio: 700, 
-        stock: 15,
+        stock: 80,
         stockCritico: 5,
         imagen: "Espinaca.png", 
         categoria: "Verdura Organicas"
@@ -54,9 +54,9 @@ export const productosIniciales = [
     { 
         id: "PIM6", 
         nombre: "Pimientos Tricolores ", 
-        descripcion: "Pimientos rojos, amarillos y verdes, ideales para salteados y platos coloridos.", 
+        descripcion: "Pimientos rojos, amarillos y verdes, ideales para salteados y platos coloridos. Ricos en antioxidantes y vitaminas, estos pimientos añaden un toque vibrante y saludable a cualquier receta. (Venta por Kilo)", 
         precio: 1500, 
-        stock: 40,
+        stock: 120,
         stockCritico: 10,
         imagen: "Pimenton.PNG", 
         categoria: "Verdura Organicas"
@@ -64,9 +64,9 @@ export const productosIniciales = [
     { 
         id: "MIE7", 
         nombre: "Miel Orgánica ", 
-        descripcion: "Miel pura y orgánica producida por apicultores locales.", 
-        precio: 900000, 
-        stock: 5,
+        descripcion: "Miel pura y orgánica producida por apicultores locales. Rica en antioxidantes y con un sabor inigualable, perfecta para endulzar de manera natural tus comidas y bebidas. (Venta por Frasco de 500g)", 
+        precio: 5000, 
+        stock: 50,
         stockCritico: 3,
         imagen: "Miel.png", 
         categoria: "Productos Organicos"
@@ -74,7 +74,7 @@ export const productosIniciales = [
     { 
         id: "QUI8", 
         nombre: "Quinua Orgánica ", 
-        descripcion: "Quinua andina, un superalimento rico en proteínas, fibra y minerales.", 
+        descripcion: "Quinua andina, un superalimento rico en proteínas, fibra y minerales. (Venta por Kilos)", 
         precio: 800, 
         stock: 20,
         stockCritico: 5,
@@ -84,7 +84,7 @@ export const productosIniciales = [
     { 
         id: "LECH9", 
         nombre: "Leche Entera ", 
-        descripcion: "Leche fresca de granjas locales que se dedican a la producción responsable.", 
+        descripcion: "Leche fresca de granjas locales que se dedican a la producción responsable. (Venta por Litro)", 
         precio: 2700, 
         stock: 30,
         stockCritico: 10,
@@ -92,4 +92,3 @@ export const productosIniciales = [
         categoria: "Productos Lacteos"
     },
 ];
-
