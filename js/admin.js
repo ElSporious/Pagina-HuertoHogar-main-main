@@ -189,8 +189,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td><span class="${stockClase}">${producto.stock}</span></td>
                 <td>${producto.categoria}</td>
                 <td>
-                    <button class="btn btn-warning btn-sm btn-editar" data-id="${producto.id}">Editar</button>
-                    <button class="btn btn-danger btn-sm btn-eliminar" data-id="${producto.id}">Eliminar</button>
+                    <button data-id="${producto.id}">Editar</button>
+                    <button data-id="${producto.id}">Eliminar</button>
                 </td>
             `;
             productTableBody.appendChild(row);
@@ -212,21 +212,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function agregarOEditarProducto(e) {
+    // AÑADE ESTA FUNCIÓN AL ARCHIVO
+    function guardarProducto(e) {
         e.preventDefault();
 
         const form = e.target;
-        const idProducto = form.querySelector('#idProducto').value.trim();
-        const nombre = form.querySelector('#nombre').value.trim();
-        const descripcion = form.querySelector('#descripcion').value.trim();
-        const precio = parseFloat(form.querySelector('#precio').value);
-        const stock = parseInt(form.querySelector('#stock').value, 10);
-        const stockCriticoInput = form.querySelector('#stockCritico');
-        const stockCritico = stockCriticoInput.value ? parseInt(stockCriticoInput.value, 10) : null;
-        const imagen = form.querySelector('#imagen').value.trim();
-        const categoria = form.querySelector('#categoria').value;
+        const idProducto = form.querySelector('#idProducto')?.value.trim() || form.querySelector('#producto-id')?.value;
+        const nombre = form.querySelector('#nombre')?.value.trim() || form.querySelector('#edit-nombre')?.value.trim();
+        const descripcion = form.querySelector('#descripcion')?.value.trim() || form.querySelector('#edit-descripcion')?.value.trim();
+        const precio = parseFloat(form.querySelector('#precio')?.value || form.querySelector('#edit-precio')?.value);
+        const stock = parseInt(form.querySelector('#stock')?.value, 10) || parseInt(form.querySelector('#edit-stock')?.value, 10);
+        const stockCriticoInput = form.querySelector('#stockCritico') || form.querySelector('#edit-stockCritico');
+        const stockCritico = stockCriticoInput?.value ? parseInt(stockCriticoInput.value, 10) : null;
+        const imagen = form.querySelector('#imagen')?.value.trim() || form.querySelector('#edit-imagen')?.value.trim();
+        const categoria = form.querySelector('#categoria')?.value || form.querySelector('#edit-categoria')?.value;
 
         // Validaciones
+        if (!idProducto || !nombre || !descripcion || !categoria || isNaN(precio) || isNaN(stock) || precio < 0 || stock < 0 || (stockCriticoInput?.value && isNaN(stockCritico) || stockCritico < 0)) {
+            alert('Por favor, completa todos los campos correctamente.');
+            return;
+        }
+
         if (idProducto.length < 3) {
             alert("El código del producto debe tener al menos 3 caracteres.");
             return;
@@ -237,22 +243,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (descripcion.length > 500) {
             alert("La descripción no puede exceder los 500 caracteres.");
-            return;
-        }
-        if (isNaN(precio) || precio < 0) {
-            alert("El precio debe ser un número igual o superior a 0.");
-            return;
-        }
-        if (isNaN(stock) || stock < 0) {
-            alert("El stock debe ser un número entero igual o superior a 0.");
-            return;
-        }
-        if (stockCriticoInput.value && (isNaN(stockCritico) || stockCritico < 0)) {
-            alert("El stock crítico debe ser un número entero igual o superior a 0.");
-            return;
-        }
-        if (!categoria) {
-            alert("Debe seleccionar una categoría.");
             return;
         }
 
@@ -294,6 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         localStorage.setItem('productos', JSON.stringify(productos));
         form.reset();
+        cambiarVistaInventario('principal');
         listarProductos();
     }
     
@@ -357,66 +348,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('edit-categoria').value = productoAEditar.categoria;
 
-        document.getElementById('product-edit-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const form = e.target;
-            const id = form.querySelector('#producto-id').value;
-            const nombre = form.querySelector('#edit-nombre').value.trim();
-            const descripcion = form.querySelector('#edit-descripcion').value.trim();
-            const precio = parseFloat(form.querySelector('#edit-precio').value);
-            const stock = parseInt(form.querySelector('#edit-stock').value, 10);
-            const stockCriticoInput = form.querySelector('#edit-stockCritico');
-            const stockCritico = stockCriticoInput.value ? parseInt(stockCriticoInput.value, 10) : null;
-            const imagen = form.querySelector('#edit-imagen').value.trim();
-            const categoria = form.querySelector('#edit-categoria').value;
-
-            // Validaciones (similares a agregar)
-            if (nombre.length > 100) {
-                alert("El nombre no puede exceder los 100 caracteres.");
-                return;
-            }
-            if (descripcion.length > 500) {
-                alert("La descripción no puede exceder los 500 caracteres.");
-                return;
-            }
-            if (isNaN(precio) || precio < 0) {
-                alert("El precio debe ser un número igual o superior a 0.");
-                return;
-            }
-            if (isNaN(stock) || stock < 0) {
-                alert("El stock debe ser un número entero igual o superior a 0.");
-                return;
-            }
-            if (stockCriticoInput.value && (isNaN(stockCritico) || stockCritico < 0)) {
-                alert("El stock crítico debe ser un número entero igual o superior a 0.");
-                return;
-            }
-            if (!categoria) {
-                alert("Debe seleccionar una categoría.");
-                return;
-            }
-
-            const productos = JSON.parse(localStorage.getItem('productos')) || [];
-            const index = productos.findIndex(p => p.id === id);
-            
-            if (index !== -1) {
-                productos[index] = {
-                    id: id,
-                    nombre: nombre,
-                    descripcion: descripcion,
-                    precio: precio,
-                    stock: stock,
-                    stockCritico: stockCritico,
-                    imagen: imagen,
-                    categoria: categoria
-                };
-                localStorage.setItem('productos', JSON.stringify(productos));
-                alert('Producto actualizado exitosamente.');
-                cambiarVistaInventario('principal');
-                listarProductos();
-            }
-        });
-
+        document.getElementById('product-edit-form').addEventListener('submit', guardarProducto);
         document.getElementById('btn-cancelar-edicion-producto').addEventListener('click', () => {
             cambiarVistaInventario('principal');
             listarProductos();
@@ -443,7 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const productForm = document.getElementById('product-form');
     if (productForm) {
-        productForm.addEventListener('submit', agregarOEditarProducto);
+        productForm.addEventListener('submit', guardarProducto);
     }
     
     // Funciones para gestión de Usuarios
@@ -483,8 +415,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td>${usuario.region}</td>
                         <td>${usuario.comuna}</td>
                         <td>
-                            <button class="btn btn-warning btn-sm btn-editar-usuario" data-index="${index}">Editar</button>
-                            <button class="btn btn-danger btn-sm btn-eliminar-usuario" data-index="${index}">Eliminar</button>
+                            <button data-index="${index}">Editar</button>
+                            <button data-index="${index}">Eliminar</button>
                         </td>
                     </tr>
                 `;
@@ -690,7 +622,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Funciones para gestión de Mensajes de Contacto
-    // ------------------------------------
     function mostrarMensajes() {
         const mensajes = JSON.parse(localStorage.getItem('mensajesContacto')) || [];
         const mensajesTableBody = document.getElementById('mensajes-table-body');
@@ -717,60 +648,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    
     // Funciones para gestión de Pedidos
     // ------------------------------------
     function inicializarPedidos() {
         const pedidosGuardados = localStorage.getItem('pedidos');
         if (!pedidosGuardados) {
             // Datos de prueba para pedidos
-            const pedidosDePrueba = [
-                {
-                    id: 1,
-                    usuario: "juan.perez@gmail.com",
-                    fecha: "2025-05-10",
-                    productos: "Manzanas Fuji (2), Plátanos (1)",
-                    direccion: "Calle Falsa 123",
-                    total: 3200
-                },
-                {
-                    id: 2,
-                    usuario: "maria.lopez@duoc.cl",
-                    fecha: "2025-05-11",
-                    productos: "Espinacas (1), Miel (1)",
-                    direccion: "Avenida Siempre Viva 456",
-                    total: 900700
-                }
-            ];
-            localStorage.setItem('pedidos', JSON.stringify(pedidosDePrueba));
+
         }
     }
 
-    function mostrarPedidos() {
-        const pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
-        const pedidosTableBody = document.getElementById('pedidos-table-body');
-
-        if (!pedidosTableBody) return;
-
-        pedidosTableBody.innerHTML = '';
-
-        if (pedidos.length === 0) {
-            pedidosTableBody.innerHTML = '<tr><td colspan="6" class="text-center">No hay pedidos registrados.</td></tr>';
-            return;
-        }
-
-        pedidos.forEach(pedido => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${pedido.id}</td>
-                <td>${pedido.usuario}</td>
-                <td>${pedido.fecha}</td>
-                <td>${pedido.productos}</td>
-                <td>${pedido.direccion}</td>
-                <td>$${pedido.total.toLocaleString('es-CL')}</td>
-            `;
-            pedidosTableBody.appendChild(row);
-        });
-    }
+    
 
     // Al cargar la página, mostrar la sección de inicio por defecto
     mostrarSeccion(seccionInicio);

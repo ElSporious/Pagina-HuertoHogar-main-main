@@ -26,15 +26,26 @@ function agregarAlCarrito(id) {
 
     const item = carrito.find(i => i.id === id);
 
+    // Verificamos si la cantidad en el carrito es menor que el stock del producto.
     if (item) {
-        item.cantidad += 1;
+        if (item.cantidad < producto.stock) {
+            item.cantidad += 1;
+        } else {
+            alert(`No hay más stock disponible de ${producto.nombre}.`);
+        }
     } else {
-        carrito.push({ ...producto, cantidad: 1 });
+        // Si el producto no está en el carrito, lo agregamos si hay stock.
+        if (producto.stock > 0) {
+            carrito.push({ ...producto, cantidad: 1 });
+        } else {
+            alert(`No hay stock disponible de ${producto.nombre}.`);
+        }
     }
 
     guardarCarrito();
     mostrarCarrito();
 }
+
 
 // Disminuir cantidad
 function disminuirCantidad(id) {

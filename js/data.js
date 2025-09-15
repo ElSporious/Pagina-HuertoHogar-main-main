@@ -92,3 +92,4 @@ export const productosIniciales = [
         categoria: "Productos Lacteos"
     },
 ];
+

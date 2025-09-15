@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('El correo excede los 100 caracteres máximos');
             return;
         }
-        
+
         if (mensaje.length > 500) {
             alert('El mensaje excede los 500 caracteres máximos');
             return;
@@ -35,24 +35,32 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Obtiene la lista de mensajes existente o crea una nueva
+        let mensajes = JSON.parse(localStorage.getItem('mensajesContacto')) || [];
+
+        // ----------------------------------------------------
+        // Lógica para el ID auto-incremental
+        // ----------------------------------------------------
+        // Si hay mensajes, encuentra el ID más alto. Si no, empieza en 0.
+        const ultimoId = mensajes.length > 0 ? Math.max(...mensajes.map(m => m.id)) : 0;
+        const nuevoId = ultimoId + 1;
+        // ----------------------------------------------------
+
         const datosContacto = {
-            id: Date.now(),
+            id: nuevoId,
             nombre: nombreCompleto,
             email: correo,
             mensaje: mensaje,
             fechaEnvio: new Date().toLocaleString()
         };
 
-        // Obtiene la lista de mensajes existente o crea una nueva
-        let mensajes = JSON.parse(localStorage.getItem('mensajesContacto')) || [];
-        
         // Agrega el nuevo mensaje a la lista
         mensajes.push(datosContacto);
 
         // Guarda la lista actualizada en localStorage
         localStorage.setItem('mensajesContacto', JSON.stringify(mensajes));
 
-        alert('Mensaje enviado y datos guardados. ¡Gracias por contactarnos!');
+        alert('Mensaje enviado. ¡Gracias por contactarnos!');
         formContacto.reset();
     });
 });
