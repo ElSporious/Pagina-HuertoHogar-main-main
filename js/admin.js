@@ -81,11 +81,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnUsuarios = document.getElementById('btn-usuarios');
     const btnInventario = document.getElementById('btn-inventario');
     const btnMensajes = document.getElementById('btn-mensajes');
+    const btnPedidos = document.getElementById('btn-pedidos');
 
     const seccionInicio = document.getElementById('seccion_inicio');
     const contenedorUsuarios = document.getElementById('contenedor_usuarios');
     const contenedorInventario = document.getElementById('contenedor_inventario');
     const contenedorMensajes = document.getElementById('contenedor_mensajes');
+    const contenedorPedidos = document.getElementById('contenedor_pedidos');
 
     const vistaInventarioPrincipal = document.getElementById('vista_inventario_principal');
     const contenedorEditarProducto = document.getElementById('contenedor_editar_producto');
@@ -380,7 +382,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function configurarFormularioAdicion() {
         const productForm = document.getElementById('product-form');
         if (productForm) {
-            // Asegura que no se añadan múltiples listeners
             productForm.removeEventListener('submit', guardarProducto);
             productForm.addEventListener('submit', guardarProducto);
         }
@@ -665,6 +666,24 @@ document.addEventListener('DOMContentLoaded', () => {
     function inicializarPedidos() {
         const pedidosGuardados = localStorage.getItem('pedidos');
         if (!pedidosGuardados) {
+            const pedidosDePrueba = [
+                {
+                    id: 1,
+                    usuario: "juan.perez@gmail.com",
+                    fecha: "2025-05-10",
+                    productos: "Manzanas Fuji (2), Plátanos (1)",
+                    direccion: "Calle Falsa 123",
+                    total: 3200
+                },
+                {
+                    id: 2,
+                    usuario: "maria.lopez@duoc.cl",
+                    fecha: "2025-05-11",
+                    productos: "Espinacas (1), Miel (1)",
+                    direccion: "Avenida Siempre Viva 456",
+                    total: 900700
+                }
+            ];
             localStorage.setItem('pedidos', JSON.stringify(pedidosDePrueba));
         }
     }
