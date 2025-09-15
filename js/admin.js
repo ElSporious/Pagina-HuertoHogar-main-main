@@ -81,13 +81,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnUsuarios = document.getElementById('btn-usuarios');
     const btnInventario = document.getElementById('btn-inventario');
     const btnMensajes = document.getElementById('btn-mensajes');
-    const btnPedidos = document.getElementById('btn-pedidos');
 
     const seccionInicio = document.getElementById('seccion_inicio');
     const contenedorUsuarios = document.getElementById('contenedor_usuarios');
     const contenedorInventario = document.getElementById('contenedor_inventario');
     const contenedorMensajes = document.getElementById('contenedor_mensajes');
-    const contenedorPedidos = document.getElementById('contenedor_pedidos');
 
     const vistaInventarioPrincipal = document.getElementById('vista_inventario_principal');
     const contenedorEditarProducto = document.getElementById('contenedor_editar_producto');
@@ -156,6 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (vista === 'principal') {
             vistaInventarioPrincipal.classList.remove('d-none');
             contenedorEditarProducto.classList.add('d-none');
+            configurarFormularioAdicion();
         } else if (vista === 'editar') {
             vistaInventarioPrincipal.classList.add('d-none');
             contenedorEditarProducto.classList.remove('d-none');
@@ -189,8 +188,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td><span class="${stockClase}">${producto.stock}</span></td>
                 <td>${producto.categoria}</td>
                 <td>
-                    <button data-id="${producto.id}">Editar</button>
-                    <button data-id="${producto.id}">Eliminar</button>
+                    <button class="btn btn-warning btn-sm btn-editar" data-id="${producto.id}">Editar</button>
+                    <button class="btn btn-danger btn-sm btn-eliminar" data-id="${producto.id}">Eliminar</button>
                 </td>
             `;
             productTableBody.appendChild(row);
@@ -212,20 +211,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // AÑADE ESTA FUNCIÓN AL ARCHIVO
     function guardarProducto(e) {
         e.preventDefault();
 
         const form = e.target;
-        const idProducto = form.querySelector('#idProducto')?.value.trim() || form.querySelector('#producto-id')?.value;
-        const nombre = form.querySelector('#nombre')?.value.trim() || form.querySelector('#edit-nombre')?.value.trim();
-        const descripcion = form.querySelector('#descripcion')?.value.trim() || form.querySelector('#edit-descripcion')?.value.trim();
-        const precio = parseFloat(form.querySelector('#precio')?.value || form.querySelector('#edit-precio')?.value);
-        const stock = parseInt(form.querySelector('#stock')?.value, 10) || parseInt(form.querySelector('#edit-stock')?.value, 10);
-        const stockCriticoInput = form.querySelector('#stockCritico') || form.querySelector('#edit-stockCritico');
+        // Obtener los valores directamente del formulario que hizo el submit
+        const idProducto = form.querySelector('#idProducto')?.value.trim();
+        const nombre = form.querySelector('#nombre')?.value.trim();
+        const descripcion = form.querySelector('#descripcion')?.value.trim();
+        const precio = parseFloat(form.querySelector('#precio')?.value);
+        const stock = parseInt(form.querySelector('#stock')?.value, 10);
+        const stockCriticoInput = form.querySelector('#stockCritico');
         const stockCritico = stockCriticoInput?.value ? parseInt(stockCriticoInput.value, 10) : null;
-        const imagen = form.querySelector('#imagen')?.value.trim() || form.querySelector('#edit-imagen')?.value.trim();
-        const categoria = form.querySelector('#categoria')?.value || form.querySelector('#edit-categoria')?.value;
+        const imagen = form.querySelector('#imagen')?.value.trim();
+        const categoria = form.querySelector('#categoria')?.value;
+        const productoIdOriginal = form.querySelector('#producto-id')?.value;
+
 
         // Validaciones
         if (!idProducto || !nombre || !descripcion || !categoria || isNaN(precio) || isNaN(stock) || precio < 0 || stock < 0 || (stockCriticoInput?.value && isNaN(stockCritico) || stockCritico < 0)) {
@@ -247,21 +248,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const productos = JSON.parse(localStorage.getItem('productos')) || [];
-        const indiceProducto = productos.findIndex(p => p.id === idProducto);
 
-        if (indiceProducto !== -1) {
-            // Edición de producto existente
-            productos[indiceProducto] = {
-                id: idProducto,
-                nombre: nombre,
-                descripcion: descripcion,
-                precio: precio,
-                stock: stock,
-                stockCritico: stockCritico,
-                imagen: imagen,
-                categoria: categoria
-            };
-            alert("Producto actualizado exitosamente.");
+        // Si existe un productoIdOriginal, estamos editando
+        if (productoIdOriginal) {
+            const indiceProducto = productos.findIndex(p => p.id === productoIdOriginal);
+            if (indiceProducto !== -1) {
+                productos[indiceProducto] = {
+                    id: productoIdOriginal, // Mantenemos el ID original
+                    nombre: nombre,
+                    descripcion: descripcion,
+                    precio: precio,
+                    stock: stock,
+                    stockCritico: stockCritico,
+                    imagen: imagen,
+                    categoria: categoria
+                };
+                alert("Producto actualizado exitosamente.");
+            }
         } else {
             // Creación de nuevo producto
             const idExistente = productos.find(p => p.id === idProducto);
@@ -297,41 +300,42 @@ document.addEventListener('DOMContentLoaded', () => {
         cambiarVistaInventario('editar');
         const formContainer = document.getElementById('product-edit-form-container');
         
+        // CORREGIDO: Los IDs del formulario de edición deben ser los mismos que los del formulario de adición
         formContainer.innerHTML = `
             <div class="card-body">
                 <form id="product-edit-form">
                     <input type="hidden" id="producto-id" value="${productoAEditar.id}">
                     <div class="mb-3">
-                        <label for="edit-id" class="form-label">Código producto</label>
-                        <input type="text" class="form-control" id="edit-id" value="${productoAEditar.id}" disabled>
+                        <label for="idProducto" class="form-label">Código producto</label>
+                        <input type="text" class="form-control" id="idProducto" value="${productoAEditar.id}" disabled>
                     </div>
                     <div class="mb-3">
-                        <label for="edit-nombre" class="form-label">Nombre</label>
-                        <input type="text" class="form-control" id="edit-nombre" value="${productoAEditar.nombre}" maxlength="100" required>
+                        <label for="nombre" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="nombre" value="${productoAEditar.nombre}" maxlength="100" required>
                     </div>
                     <div class="mb-3">
-                        <label for="edit-descripcion" class="form-label">Descripción</label>
-                        <textarea class="form-control" id="edit-descripcion" rows="2" maxlength="500">${productoAEditar.descripcion}</textarea>
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="descripcion" rows="2" maxlength="500">${productoAEditar.descripcion}</textarea>
                     </div>
                     <div class="mb-3">
-                        <label for="edit-precio" class="form-label">Precio (CLP)</label>
-                        <input type="number" class="form-control" id="edit-precio" value="${productoAEditar.precio}" min="0" step="0.01" required>
+                        <label for="precio" class="form-label">Precio (CLP)</label>
+                        <input type="number" class="form-control" id="precio" value="${productoAEditar.precio}" min="0" step="0.01" required>
                     </div>
                     <div class="mb-3">
-                        <label for="edit-stock" class="form-label">Stock</label>
-                        <input type="number" class="form-control" id="edit-stock" value="${productoAEditar.stock}" min="0" step="1" required>
+                        <label for="stock" class="form-label">Stock</label>
+                        <input type="number" class="form-control" id="stock" value="${productoAEditar.stock}" min="0" step="1" required>
                     </div>
                     <div class="mb-3">
-                        <label for="edit-stockCritico" class="form-label">Stock Crítico (Opcional)</label>
-                        <input type="number" class="form-control" id="edit-stockCritico" value="${productoAEditar.stockCritico !== null ? productoAEditar.stockCritico : ''}" min="0" step="1">
+                        <label for="stockCritico" class="form-label">Stock Crítico (Opcional)</label>
+                        <input type="number" class="form-control" id="stockCritico" value="${productoAEditar.stockCritico !== null ? productoAEditar.stockCritico : ''}" min="0" step="1">
                     </div>
                     <div class="mb-3">
-                        <label for="edit-imagen" class="form-label">Nombre de la Imagen</label>
-                        <input type="text" class="form-control" id="edit-imagen" value="${productoAEditar.imagen}">
+                        <label for="imagen" class="form-label">Nombre de la Imagen</label>
+                        <input type="text" class="form-control" id="imagen" value="${productoAEditar.imagen}">
                     </div>
                     <div class="mb-3">
-                        <label for="edit-categoria" class="form-label">Categoría</label>
-                        <select class="form-select" id="edit-categoria" required>
+                        <label for="categoria" class="form-label">Categoría</label>
+                        <select class="form-select" id="categoria" required>
                             <option value="Frutas">Frutas</option>
                             <option value="Verdura Organicas">Verdura Orgánicas</option>
                             <option value="Productos Organicos">Productos Orgánicos</option>
@@ -346,7 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
 
-        document.getElementById('edit-categoria').value = productoAEditar.categoria;
+        document.getElementById('categoria').value = productoAEditar.categoria;
 
         document.getElementById('product-edit-form').addEventListener('submit', guardarProducto);
         document.getElementById('btn-cancelar-edicion-producto').addEventListener('click', () => {
@@ -373,10 +377,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    const productForm = document.getElementById('product-form');
-    if (productForm) {
-        productForm.addEventListener('submit', guardarProducto);
+    function configurarFormularioAdicion() {
+        const productForm = document.getElementById('product-form');
+        if (productForm) {
+            // Asegura que no se añadan múltiples listeners
+            productForm.removeEventListener('submit', guardarProducto);
+            productForm.addEventListener('submit', guardarProducto);
+        }
     }
+
+    // Llama a la función de configuración al cargar la página
+    configurarFormularioAdicion();
     
     // Funciones para gestión de Usuarios
     // ------------------------------------
@@ -415,8 +426,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td>${usuario.region}</td>
                         <td>${usuario.comuna}</td>
                         <td>
-                            <button data-index="${index}">Editar</button>
-                            <button data-index="${index}">Eliminar</button>
+                            <button class="btn btn-warning btn-sm btn-editar-usuario" data-index="${index}">Editar</button>
+                            <button class="btn btn-danger btn-sm btn-eliminar-usuario" data-index="${index}">Eliminar</button>
                         </td>
                     </tr>
                 `;
@@ -654,12 +665,36 @@ document.addEventListener('DOMContentLoaded', () => {
     function inicializarPedidos() {
         const pedidosGuardados = localStorage.getItem('pedidos');
         if (!pedidosGuardados) {
-            // Datos de prueba para pedidos
-
+            localStorage.setItem('pedidos', JSON.stringify(pedidosDePrueba));
         }
     }
 
-    
+    function mostrarPedidos() {
+        const pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
+        const pedidosTableBody = document.getElementById('pedidos-table-body');
+
+        if (!pedidosTableBody) return;
+
+        pedidosTableBody.innerHTML = '';
+
+        if (pedidos.length === 0) {
+            pedidosTableBody.innerHTML = '<tr><td colspan="6" class="text-center">No hay pedidos registrados.</td></tr>';
+            return;
+        }
+
+        pedidos.forEach(pedido => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${pedido.id}</td>
+                <td>${pedido.usuario}</td>
+                <td>${pedido.fecha}</td>
+                <td>${pedido.productos}</td>
+                <td>${pedido.direccion}</td>
+                <td>$${pedido.total.toLocaleString('es-CL')}</td>
+            `;
+            pedidosTableBody.appendChild(row);
+        });
+    }
 
     // Al cargar la página, mostrar la sección de inicio por defecto
     mostrarSeccion(seccionInicio);
